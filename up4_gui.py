@@ -6,6 +6,7 @@ import up4
 import numpy as np
 import tkinter as tk
 from tkinter import filedialog
+from up4.plotting import Plotter2D
 
 # Create a root window but keep it hidden
 root = tk.Tk()
@@ -15,7 +16,6 @@ root.withdraw()
 filename = filedialog.askopenfilename()
 print(filename)
 root.destroy()
-
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -29,24 +29,24 @@ app.layout = html.Div([
 
         html.Div([
             dcc.Dropdown(
-                ['Number Field', "Velocity Field", "Occupancy Field", "Dispersion Field"],
-                "Velocity Field",
+                ["Velocity Magnitude Field", "Velocity Vector Field", 'Number Field', "Occupancy Field", "Dispersion Field"],
+                "Velocity Magnitude Field",
                 id='filter-field',
             ),
-            dcc.RadioItems( 
+            dcc.RadioItems(
                 ['Cartesian', 'Cylindrical'],
                 'Cartesian',
                 id='filter-gridtype',
                 labelStyle={'display': 'inline-block', 'marginTop': '5px'}
             ),
-            dcc.RadioItems( 
+            dcc.RadioItems(
                 ['X', 'Y', 'Z'],
                 'X',
                 id='filter-grid_axis',
                 labelStyle={'display': 'inline-block', 'marginTop': '5px'}
             ),
 
-            dcc.RadioItems( 
+            dcc.RadioItems(
                 ['Depth Average', 'Slice'],
                 'Depth Average',
                 id='filter-plot_type',
@@ -55,19 +55,19 @@ app.layout = html.Div([
             html.Div([
                 "Select Slice Position",
                 dcc.Slider(
-                    0,#data.dimensions()["xmin"],
-                    1,#data.dimensions()["xmax"],
-                    #step=None,
+                    0,  # data.dimensions()["xmin"],
+                    1,  # data.dimensions()["xmax"],
+                    # step=None,
                     id='filter-slice_position',
-                    value=0,#(data.dimensions()["xmin"] + data.dimensions()["xmax"])/2,
-                    marks={i: f'{i:.02f}' for i in np.linspace(0,1, 10)}
+                    value=0,  # (data.dimensions()["xmin"] + data.dimensions()["xmax"])/2,
+                    marks={i: f'{i:.02f}' for i in np.linspace(0, 1, 10)}
                 ),
-            ],id='slice-container', style={'width': '99%', 'display': 'none'}),
+            ], id='slice-container', style={'width': '99%', 'display': 'none'}),
 
             html.Div([
-                "Cell Size x,y,z [mm] ", # cell size needs to be dfferent, choosen!
+                "Cell Size x,y,z [mm] ",  # cell size needs to be dfferent, choosen!
                 dcc.Input(id='filter-cellsize', value='5,5,5', type='text'),
-            ],id='cell_size_container', style={'display': 'inline-block'}),
+            ], id='cell_size_container', style={'display': 'inline-block'}),
             # update button
             html.Button('Update', id='update-button', n_clicks=0),
             html.Div([
@@ -82,34 +82,34 @@ app.layout = html.Div([
                     id='filter-dispersion_show_dist',
                 ),
                 dcc.Input(id='filter-num_traj', value=10, type='text'),
-            ], id = 'dispersion_particle_container', style={'display': 'inline-block'}),
+            ], id='dispersion_particle_container', style={'display': 'inline-block'}),
             html.Div([
                 "Select time range:",
                 dcc.RangeSlider(
-                    0, #np.min(time),
-                    1,#np.max(time),
-                    #step=None,
+                    0,  # np.min(time),
+                    1,  # np.max(time),
+                    # step=None,
                     id='filter-time',
-                    value=[0,1],#[np.min(time), np.max(time)],
+                    value=[0, 1],  # [np.min(time), np.max(time)],
                     allowCross=False,
-                    marks={i: f'{i:.02f}' for i in np.linspace(0,1, 10)}
+                    marks={i: f'{i:.02f}' for i in np.linspace(0, 1, 10)}
                 ),
             ], style={'width': '99%', 'display': 'inline-block'}),
             html.Div(
-                     [
-                "Select time range for Dispersion:",
-                dcc.Slider(
-                    0.0,
-                    1,#np.max(time)-np.min(time),
-                    #step=None,
-                    id='filter-time_for_dispersion',
-                    value=1.0,
-                    marks={i: f'{i:.02f}' for i in np.linspace(0.0, 1, 10)}
-                ),
-            ],id='slider-container', style={'width': '99%', 'display': 'none'}),
-            
+                [
+                    "Select time range for Dispersion:",
+                    dcc.Slider(
+                        0.0,
+                        1,  # np.max(time)-np.min(time),
+                        # step=None,
+                        id='filter-time_for_dispersion',
+                        value=1.0,
+                        marks={i: f'{i:.02f}' for i in np.linspace(0.0, 1, 10)}
+                    ),
+                ], id='slider-container', style={'width': '99%', 'display': 'none'}),
+
         ],
-        style={'width': '99%', 'display': 'inline-block'}),
+            style={'width': '99%', 'display': 'inline-block'}),
 
     ], style={
         'padding': '10px 5px', 'display': 'flex'
@@ -122,7 +122,7 @@ app.layout = html.Div([
     ], style={'width': '99%'}),
 
     html.Div([
-        html.Button('Upload Data', id='upload-data', n_clicks=0),
+        html.Button('Update Graph', id='upload-data', n_clicks=0),
     ])
 
 ])
@@ -140,6 +140,7 @@ def show_hide_element(visibility_state):
     else:
         return {'display': 'none'}
 
+
 # show or hide cell size input
 @callback(
     Output(component_id='cell_size_container', component_property='style'),
@@ -151,7 +152,8 @@ def show_hide_cellsize(visibility_state):
         return {'display': 'block'}
     else:
         return {'display': 'none'}
-    
+
+
 # show or hide cell size input
 @callback(
     Output(component_id='slice-container', component_property='style'),
@@ -163,6 +165,7 @@ def show_hide_slice_container(visibility_state):
         return {'width': '99%', 'display': 'inline-block'}
     else:
         return {'width': '99%', 'display': 'none'}
+
 
 # show or hide cell size input
 @callback(
@@ -177,13 +180,14 @@ def show_hide_dispersion_particle_container(visibility_state):
         return {'display': 'none'}
 
 
-@callback( 
+@callback(
     Output('filter-slice_position', 'min'),
     Input('filter-grid_axis', 'value'),
     prevent_initial_call=True
 )
 def update_slider_min(axis):
     return np.min(data.dimensions()[f"{axis.lower()}min"])
+
 
 @callback(
     Output('filter-slice_position', 'max'),
@@ -193,9 +197,10 @@ def update_slider_min(axis):
 def update_slider_max(axis):
     return np.max(data.dimensions()[f"{axis.lower()}max"])
 
-###### Hover 
+
+###### Hover
 @callback(
-    Output('main-graph', 'figure',allow_duplicate=True),
+    Output('main-graph', 'figure', allow_duplicate=True),
     State('filter-field', 'value'),
     State('filter-num_traj', 'value'),
     Input('main-graph', 'clickData'),
@@ -207,19 +212,19 @@ def update_slider_max(axis):
     State('filter-dispersion_show_dist', 'value'),
     prevent_initial_call=True
 )
-def display_hover_data(filed_type,num_particles,hoverData, fig,slice_position, tfd,axis, show_traj, show_dist):
+def display_hover_data(filed_type, num_particles, hoverData, fig, slice_position, tfd, axis, show_traj, show_dist):
     if axis == 'X':
-        x=slice_position
-        y=hoverData["points"][0]['x'] 
-        z=hoverData["points"][0]['y']
+        x = slice_position
+        y = hoverData["points"][0]['x']
+        z = hoverData["points"][0]['y']
     elif axis == 'Y':
-        x=hoverData["points"][0]['x']
-        y=slice_position
-        z=hoverData["points"][0]['y']
+        x = hoverData["points"][0]['x']
+        y = slice_position
+        z = hoverData["points"][0]['y']
     else:
-        x=hoverData["points"][0]['x']
-        y=hoverData["points"][0]['y']
-        z=slice_position
+        x = hoverData["points"][0]['x']
+        y = hoverData["points"][0]['y']
+        z = slice_position
     print("in hover data")
 
     print(filed_type, num_particles, hoverData)
@@ -228,7 +233,7 @@ def display_hover_data(filed_type,num_particles,hoverData, fig,slice_position, t
         if not (show_dist or show_traj):
             return fig
         # find particles in the cell
-        cell_id = grid.cell_id(x,y,z)
+        cell_id = grid.cell_id(x, y, z)
 
         count = 0
         traj_x = [np.nan]
@@ -236,24 +241,23 @@ def display_hover_data(filed_type,num_particles,hoverData, fig,slice_position, t
         traj_z = [np.nan]
         print("Calling rust")
         trajectories = data.extract_dispersion_trajectories(
-            grid,tfd,int(num_particles),cell_id)
+            grid, tfd, int(num_particles), cell_id)
         print("done")
         end_points = np.asarray([traj[-1] for traj in trajectories if len(traj) > 0])
         trajectories = np.asarray([np.asarray(traj) for traj in trajectories], dtype=object)
         if show_traj:
-            
-            for id,traj in enumerate(trajectories):
+
+            for id, traj in enumerate(trajectories):
                 if len(traj) == 0:
                     continue
                 print(traj)
-                traj_x.extend(traj[:,0])
-                traj_y.extend(traj[:,1])
-                traj_z.extend(traj[:,2])
+                traj_x.extend(traj[:, 0])
+                traj_y.extend(traj[:, 1])
+                traj_z.extend(traj[:, 2])
                 traj_x.append(np.nan)
                 traj_y.append(np.nan)
                 traj_z.append(np.nan)
 
-            
             if axis == 'X':
                 fig.add_trace(go.Scatter(x=traj_y, y=traj_z, mode='lines', name='Trajectory'))
             elif axis == 'Y':
@@ -262,21 +266,28 @@ def display_hover_data(filed_type,num_particles,hoverData, fig,slice_position, t
                 fig.add_trace(go.Scatter(x=traj_x, y=traj_y, mode='lines', name='Trajectory'))
         if show_dist:
             # get all the end points of the trajectories
-            
+
             # get the mean and standard deviation of the end points
             mean = np.mean(end_points, axis=0)
             std = np.std(end_points, axis=0)
             # plot mean point with a circle indicating the standard deviation
             # use this:
-            kwargs = {'type': 'circle', 'xref': 'x', 'yref': 'y', 'fillcolor': 'black', 'opacity': 0.3, 'line': {'color': 'black'}}
+            kwargs = {'type': 'circle', 'xref': 'x', 'yref': 'y', 'fillcolor': 'black', 'opacity': 0.3,
+                      'line': {'color': 'black'}}
             # points = [go.layout.Shape(x0=x-r, y0=y-r, x1=x+r, y1=y+r, **kwargs) for x, y in xy]
             # fig.update_layout(shapes=points)
             if axis == 'X':
-                points = [go.layout.Shape(x0=mean[1]-std[1], y0=mean[2]-std[2], x1=mean[1]+std[1], y1=mean[2]+std[2], **kwargs)]
+                points = [
+                    go.layout.Shape(x0=mean[1] - std[1], y0=mean[2] - std[2], x1=mean[1] + std[1], y1=mean[2] + std[2],
+                                    **kwargs)]
             elif axis == 'Y':
-                points = [go.layout.Shape(x0=mean[0]-std[0], y0=mean[2]-std[2], x1=mean[0]+std[0], y1=mean[2]+std[2], **kwargs)]
+                points = [
+                    go.layout.Shape(x0=mean[0] - std[0], y0=mean[2] - std[2], x1=mean[0] + std[0], y1=mean[2] + std[2],
+                                    **kwargs)]
             else:
-                points = [go.layout.Shape(x0=mean[0]-std[0], y0=mean[1]-std[1], x1=mean[0]+std[0], y1=mean[1]+std[1], **kwargs)]
+                points = [
+                    go.layout.Shape(x0=mean[0] - std[0], y0=mean[1] - std[1], x1=mean[0] + std[0], y1=mean[1] + std[1],
+                                    **kwargs)]
             if not show_traj:
                 # show a single line from start to end point
                 x_start = hoverData["points"][0]['x']
@@ -291,13 +302,12 @@ def display_hover_data(filed_type,num_particles,hoverData, fig,slice_position, t
                     x_end = mean[0]
                     y_end = mean[1]
                 fig.add_trace(go.Scatter(x=[x_start, x_end], y=[y_start, y_end], mode='lines', name='Dispersion'))
-            
+
             fig.add_shape(points[0])
         print('done', traj_x, traj_y, traj_z)
 
-
-            
     return fig
+
 
 @callback(
     Output('filter-slice_position', 'value', allow_duplicate=True),
@@ -319,30 +329,30 @@ def display_hover_data(filed_type,num_particles,hoverData, fig,slice_position, t
     prevent_initial_call=True
 )
 def update_filename(n_clicks):
-    
     print(filename)
-    global data ,time, dividor
+    global data, time, dividor
     data = up4.Data(filename)
     time = data.time()
-    dividor = 1000 if data.dimensions()["xmax"] -  data.dimensions()["xmin"] < 10 else 1 # crude unit check
-    filter_slice_position_value = (data.dimensions()["xmin"] + data.dimensions()["xmax"])/2
+    dividor = 1000 if data.dimensions()["xmax"] - data.dimensions()["xmin"] < 10 else 1  # crude unit check
+    filter_slice_position_value = (data.dimensions()["xmin"] + data.dimensions()["xmax"]) / 2
     filter_slice_position_min = data.dimensions()["xmin"]
     filter_slice_position_max = data.dimensions()["xmax"]
-    filter_slice_position_marks = {i: f'{i:.02f}' for i in np.linspace(data.dimensions()["xmin"], data.dimensions()["xmax"], 10)}
-    
+    filter_slice_position_marks = {i: f'{i:.02f}' for i in
+                                   np.linspace(data.dimensions()["xmin"], data.dimensions()["xmax"], 10)}
+
     filter_time_value = [np.min(time), np.max(time)]
     filter_time_min = np.min(time)
     filter_time_max = np.max(time)
     filter_time_marks = {i: f'{i:.02f}' for i in np.linspace(np.min(time), np.max(time), 10)}
-    
-    filter_time_for_dispersion = (np.max(time)-np.min(time))/2
+
+    filter_time_for_dispersion = (np.max(time) - np.min(time)) / 2
     filter_time_for_dispersion_min = 0.0
-    filter_time_for_dispersion_max = 10_000 if (np.max(time)-np.min(time)) > 10_000 else 10
-    filter_time_for_dispersion_marks = {i: f'{i:.02f}' for i in np.linspace(0.0, filter_time_for_dispersion_max , 10)}
-    
+    filter_time_for_dispersion_max = 10_000 if (np.max(time) - np.min(time)) > 10_000 else 10
+    filter_time_for_dispersion_marks = {i: f'{i:.02f}' for i in np.linspace(0.0, filter_time_for_dispersion_max, 10)}
+
     return (filter_slice_position_value,
-            filter_slice_position_min, 
-            filter_slice_position_max, 
+            filter_slice_position_min,
+            filter_slice_position_max,
             filter_slice_position_marks,
             filter_time_value,
             filter_time_min,
@@ -353,7 +363,7 @@ def update_filename(n_clicks):
             filter_time_for_dispersion_max,
             filter_time_for_dispersion_marks
             )
-     
+
 
 @callback(
     Output('main-graph', 'figure'),
@@ -368,76 +378,110 @@ def update_filename(n_clicks):
     Input('filter-time_for_dispersion', 'value'),
     Input('update-button', 'n_clicks'),
     prevent_initial_call=True
-    )
-def update_graph(field, gridtype, time, size,filename,axis, plot_type, slice_pos, tfd, n_clicks):
+)
+def update_graph(field, gridtype, time, size, filename, axis, plot_type, slice_pos, tfd, n_clicks):
     global grid
-    data.set_time(time[0]-0.001, time[1]+0.001)
+    data.set_time(time[0] - 0.001, time[1] + 0.001)
     print(size, plot_type, axis, slice_pos, tfd)
     if gridtype == 'Cartesian':
         cell_size = [int(x) for x in size.split(",")]
         assert len(cell_size) == 3
-        grid = up4.Grid(data, cell_size=[x/dividor for x in cell_size], grid_style='cartesian')
+        grid = up4.Grid(data, cell_size=[x / dividor for x in cell_size], grid_style='cartesian')
     else:
         grid = up4.Grid(data, grid_style='cylindrical')
     print(1)
-    if field == 'Number Field':
-        field = data.numberfield(grid)
-        colorbar_title="Number of Particles"
-    elif field == 'Velocity Field':
-        field = data.velocityfield(grid)
-        colorbar_title="Velocity (m s<sup>-1</sup>)"
-    elif field == 'Occupancy Field':
-        field = data.occupancyfield(grid)
-        colorbar_title="Occupancy"
-    elif field == 'Dispersion Field':
-        field, me = data.dispersion(grid, tfd)
-        colorbar_title="Dispersion (m<sup>2</sup> )"
-    print(2)
-    plotter = up4.Plotter2D(field) # create a Plotter2D instance
-    axis = 0 if axis == 'X' else 1 if axis == 'Y' else 2
-    print(3)
-    plot_layout = dict(
-        width=800, height=800,
-        xaxis_title="y position (m)",
-        yaxis_title="z position (m)",
-    ) # set layout parameters for plot
-    plot_style = dict(
-        colorbar_title=colorbar_title
-    ) # style the trace(s) in the plot
-    print(4)
-    print(plot_type, axis, slice_pos,)
-    if plot_type == 'Slice':
-        pos = [0,0,0]
-        pos[axis] = slice_pos
-        print(slice_pos, pos)
-        fig = plotter.scalar_map(
-            axis = axis,
-            selection = "plane",
-            index = grid.cell_id(pos[0],pos[1], pos[2])[axis],
-            layout = plot_layout,
-            style = plot_style
+    if field == 'Velocity Vector Field':
+        field = data.vectorfield(grid)
+        vector_plotter = Plotter2D(field)
+        colorbar_title = "Velocity (m s<sup>-1</sup>)"
+        plot_layout = dict(
+            font=dict(size=30, family="Computer Modern"),
+            yaxis=dict(
+                scaleanchor="x",
+                scaleratio=1,
+            ),
+            xaxis_title="x position",
+            yaxis_title="y position",
+            width=900,
+            height=750,
+            title="Velocity vector field xy projection",
         )
+        plot_style = dict()
+
+        fig = vector_plotter.unit_vector_plot(
+            axis=1,
+            index=10,
+            layout=plot_layout,
+            scaling_mode="full_node",
+            style=plot_style,
+        )
+        fig.update_layout(template="plotly_white")
+        fig.update_traces(
+            colorbar=dict(
+                title=dict(text="Velocity m/s"),
+            ),
+            selector=dict(type="heatmap"),
+        )
+        return fig
     else:
-        fig = plotter.scalar_map(
-            axis = axis,
-            selection = "depth_average",
-            layout = plot_layout,
-            style = plot_style
-        )
+        if field == 'Number Field':
+            field = data.numberfield(grid)
+            colorbar_title = "Number of Particles"
+        elif field == 'Velocity Magnitude Field':
+            field = data.velocityfield(grid)
+            colorbar_title = "Velocity (m s<sup>-1</sup>)"
+        elif field == 'Occupancy Field':
+            field = data.occupancyfield(grid)
+            colorbar_title = "Occupancy"
+        elif field == 'Dispersion Field':
+            field, me = data.dispersion(grid, tfd)
+            colorbar_title = "Dispersion (m<sup>2</sup> )"
+        print(2)
+        plotter = up4.Plotter2D(field)  # create a Plotter2D instance
+        axis = 0 if axis == 'X' else 1 if axis == 'Y' else 2
+        print(3)
+        plot_layout = dict(
+            width=800, height=800,
+            xaxis_title="y position (m)",
+            yaxis_title="z position (m)",
+        )  # set layout parameters for plot
+        plot_style = dict(
+            colorbar_title=colorbar_title
+        )  # style the trace(s) in the plot
+        print(4)
+        print(plot_type, axis, slice_pos, )
+        if plot_type == 'Slice':
+            pos = [0, 0, 0]
+            pos[axis] = slice_pos
+            print(slice_pos, pos)
+            fig = plotter.scalar_map(
+                axis=axis,
+                selection="plane",
+                index=grid.cell_id(pos[0], pos[1], pos[2])[axis],
+                layout=plot_layout,
+                style=plot_style
+            )
+        else:
+            fig = plotter.scalar_map(
+                axis=axis,
+                selection="depth_average",
+                layout=plot_layout,
+                style=plot_style
+            )
 
-    if gridtype != 'Cylindrical':
+        if gridtype != 'Cylindrical':
+            fig.update_layout(
+                # make equal aspect ratio
+                yaxis_scaleanchor="x",
+                yaxis_scaleratio=1,
+            )
         fig.update_layout(
-            # make equal aspect ratio
-            yaxis_scaleanchor = "x",
-            yaxis_scaleratio = 1,
+
+            template="plotly_white",
         )
-    fig.update_layout(
+        print(5)
+        return fig
 
-        template = "plotly_white",
-    )
-    print(5)
-
-    return fig
 
 
 
