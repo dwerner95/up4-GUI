@@ -8,6 +8,10 @@ import tkinter as tk
 from tkinter import filedialog
 from up4.plotting import Plotter2D
 
+# How many times has the Upload button been clicked?
+uploadcount=0
+
+# Initial file upload
 # Create a root window but keep it hidden
 root = tk.Tk()
 root.withdraw()
@@ -34,13 +38,13 @@ app.layout = html.Div([
                 id='filter-field',
             ),
             dcc.RadioItems(
-                ['Cartesian', 'Cylindrical'],
+                ['Cartesian Coordinates', 'Cylindrical Coordinates'],
                 'Cartesian',
                 id='filter-gridtype',
                 labelStyle={'display': 'inline-block', 'marginTop': '5px'}
             ),
             dcc.RadioItems(
-                ['X', 'Y', 'Z'],
+                ['X-Plane', 'Y-Plane', 'Z-Plane'],
                 'X',
                 id='filter-grid_axis',
                 labelStyle={'display': 'inline-block', 'marginTop': '5px'}
@@ -68,8 +72,7 @@ app.layout = html.Div([
                 "Cell Size x,y,z [mm] ",  # cell size needs to be dfferent, choosen!
                 dcc.Input(id='filter-cellsize', value='5,5,5', type='text'),
             ], id='cell_size_container', style={'display': 'inline-block'}),
-            # update button
-            html.Button('Update', id='update-button', n_clicks=0),
+            html.Button('Upload', id='upload-button', n_clicks=0),
             html.Div([
                 dcc.Checklist(
                     ['Show Particle Trajectories'],
@@ -376,10 +379,24 @@ def update_filename(n_clicks):
     State('filter-plot_type', 'value'),
     Input('filter-slice_position', 'value'),
     Input('filter-time_for_dispersion', 'value'),
-    Input('update-button', 'n_clicks'),
+    Input('upload-button', 'n_clicks'),
     prevent_initial_call=True
 )
-def update_graph(field, gridtype, time, size, filename, axis, plot_type, slice_pos, tfd, n_clicks):
+
+def update_graph(field, gridtype, time, size, file, axis, plot_type, slice_pos, tfd, upload):
+    # Checks if the upload button has been clicked.
+    global uploadcount
+    if uploadcount != upload:
+        uploadcount += 1
+        global filename
+        # Create a root window but keep it hidden
+        root = tk.Tk()
+        root.withdraw()
+        # Open the file dialog and get the full path of the selected file
+        filename = filedialog.askopenfilename()
+        # Update HDF5 info given new file
+        update_filename(filename)
+        root.destroy()
     global grid
     data.set_time(time[0] - 0.001, time[1] + 0.001)
     print(size, plot_type, axis, slice_pos, tfd)

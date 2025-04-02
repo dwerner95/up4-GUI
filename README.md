@@ -7,7 +7,7 @@ Please install the requirements in requirements.txt.
 You will also need to install up4. Features of the dispersion plot are currently being developed through a special version of up4, to be uploaded. 
 
 ## Interactive plotting on Bluebear (Linux/Mac/WSL)
-This allows you to run the up4 GUI without local installation. Drop the `up4_gui.py` file into your Bluebear directory. Then, enter the following into a device terminal window:
+This allows you to run the up4 GUI without local installation. Drop the `up4_gui.py` file into your Bluebear directory. Then, enter the following into your Linux/Mac/WSL terminal window:
 
     ssh -X [user]@bluebear.bham.ac.uk
  
@@ -42,4 +42,3 @@ In a second terminal window, enter:
     
 You will need to enter your BEAR password a couple of times to authenticate yourself, then as soon as you're logged in you should be able to run the GUI in your browser using the link provided by your first terminal window.
 
-credits to Peter Laszcz!
